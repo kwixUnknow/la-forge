@@ -108,9 +108,9 @@ Create the necessary files and code. Be concise."
                     log "${CYAN}Updating ticket to review...${NC}"
                     jq --arg id "$TICKET_ID" '(.tickets[] | select(.id == $id)).status = "review"' "$TICKETS" > /tmp/t.json && mv /tmp/t.json "$TICKETS"
 
-                    # 5. Clear inbox (direct jq)
-                    log "${CYAN}Clearing inbox...${NC}"
-                    jq '.pending_tasks = []' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
+                    # 5. Remove completed task from inbox (keep others)
+                    log "${CYAN}Removing task from inbox...${NC}"
+                    jq '.pending_tasks = .pending_tasks[1:]' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
 
                     # 6. Add to reviewer inbox (direct jq)
                     log "${CYAN}Adding to reviewer inbox...${NC}"
@@ -151,9 +151,9 @@ Create the necessary files and code. Be concise."
                     log "${CYAN}Updating to testing...${NC}"
                     jq --arg id "$TICKET_ID" '(.tickets[] | select(.id == $id)).status = "testing"' "$TICKETS" > /tmp/t.json && mv /tmp/t.json "$TICKETS"
 
-                    # 3. Clear inbox (direct jq)
-                    log "${CYAN}Clearing inbox...${NC}"
-                    jq '.pending_tasks = []' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
+                    # 3. Remove completed task from inbox (keep others)
+                    log "${CYAN}Removing task from inbox...${NC}"
+                    jq '.pending_tasks = .pending_tasks[1:]' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
 
                     # 4. Add to QA inbox (direct jq)
                     log "${CYAN}Adding to QA inbox...${NC}"
@@ -193,9 +193,9 @@ Create the necessary files and code. Be concise."
                     log "${CYAN}Marking as done...${NC}"
                     jq --arg id "$TICKET_ID" '(.tickets[] | select(.id == $id)).status = "done"' "$TICKETS" > /tmp/t.json && mv /tmp/t.json "$TICKETS"
 
-                    # 3. Clear inbox (direct jq)
-                    log "${CYAN}Clearing inbox...${NC}"
-                    jq '.pending_tasks = []' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
+                    # 3. Remove completed task from inbox (keep others)
+                    log "${CYAN}Removing task from inbox...${NC}"
+                    jq '.pending_tasks = .pending_tasks[1:]' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
 
                     log "Ticket $TICKET_ID DONE!"
                     IDLE_COUNT=0

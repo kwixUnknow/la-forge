@@ -55,7 +55,7 @@
       "type": "bug",
       "title": "API POST crashes server",
       "description": "Fix POST endpoint to create tickets",
-      "status": "in_progress",
+      "status": "todo",
       "priority": "high",
       "labels": [
         "bug",
