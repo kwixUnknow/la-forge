@@ -88,12 +88,7 @@ while true; do
 
                     # 1. Create branch (direct git)
                     log "${CYAN}Creating branch: $BRANCH${NC}"
-                    cd "$PROJECT_DIR"
-                    # Stash any forge state changes to allow checkout
-                    git stash push -m "forge-agent-state" -- .forge/ 2>/dev/null || true
-                    git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
-                    # Restore forge state
-                    git stash pop 2>/dev/null || true
+                    cd "$PROJECT_DIR" && git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
 
                     # 2. Implement feature (Claude does the actual work)
                     log "${CYAN}Implementing ticket...${NC}"
@@ -134,10 +129,7 @@ Create the necessary files and code. Be concise."
                       "$FORGE_DIR/agent-state/code-reviewer/inbox.json" > /tmp/r.json && mv /tmp/r.json "$FORGE_DIR/agent-state/code-reviewer/inbox.json"
 
                     # 9. Checkout main (direct git)
-                    cd "$PROJECT_DIR"
-                    git stash push -m "forge-agent-state" -- .forge/ 2>/dev/null || true
-                    git checkout main 2>/dev/null || git checkout master
-                    git stash pop 2>/dev/null || true
+                    cd "$PROJECT_DIR" && git checkout main 2>/dev/null || git checkout master
 
                     log "Ticket $TICKET_ID sent to code-reviewer (PR: $PR_NUM)"
                     IDLE_COUNT=0

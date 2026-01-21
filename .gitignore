@@ -10,7 +10,8 @@ CLAUDE.local.md
 *.swp
 
 
-# Forge agent state (transient)
+# Forge agent state (transient - modified by agents)
 .forge/agent-state/
+.forge/backlog/tickets.json
 .forge/kanban-db/
 .forge/metrics.json
