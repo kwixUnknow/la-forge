@@ -5,163 +5,57 @@
     {
       "id": "TICKET-001",
       "type": "feature",
-      "title": "Create local Kanban UI for ticket management",
-      "description": "## Context\nCurrently, tickets are managed via JSON files which is not user-friendly. We need a local web UI (like Jira/Trello) to:\n- Visualize tickets on a Kanban board\n- Drag & drop tickets between columns\n- Create/edit tickets with a form\n- See agent activity in real-time\n- Track ticket history\n\n## Technical Approach\nBuild a lightweight local web app that:\n1. Reads/writes to .forge/backlog/tickets.json\n2. Watches .forge/agent-state/ for real-time updates\n3. Displays agent status and activity\n4. No external dependencies (pure HTML/JS or simple framework)\n\n## Why\nMake La Forge more accessible and provide visual feedback on multi-agent workflow.",
+      "title": "Create local Kanban UI",
       "status": "in_progress",
-      "priority": "high",
-      "assignee": null,
-      "acceptance_criteria": [
-        "Kanban board with columns: backlog, todo, in_progress, review, testing, done",
-        "Drag & drop to move tickets between columns (updates JSON)",
-        "Click ticket to see details and edit",
-        "Form to create new tickets",
-        "Real-time display of agent status (idle/working/blocked)",
-        "Activity feed showing recent agent actions",
-        "Auto-refresh when files change",
-        "Works offline (no external API calls)",
-        "Single command to launch: forge-ui.sh"
-      ],
-      "parent": null,
-      "dependencies": [],
       "labels": [
-        "ui",
-        "dx",
-        "priority"
-      ],
-      "estimated_complexity": "L",
-      "created_at": "2026-01-21T16:00:00Z",
-      "updated_at": "2026-01-21T08:35:56Z",
-      "started_at": null,
-      "completed_at": null,
-      "history": [
-        {
-          "timestamp": "2026-01-21T16:00:00Z",
-          "from_status": null,
-          "to_status": "todo",
-          "agent": "thomas",
-          "comment": "Created ticket for Kanban UI"
-        },
-        {
-          "timestamp": "2026-01-21T08:35:36Z",
-          "from_status": "todo",
-          "to_status": "in_progress",
-          "agent": "supervisor",
-          "comment": "Assigned to developer"
-        },
-        {
-          "timestamp": "2026-01-21T08:35:56Z",
-          "from_status": "todo",
-          "to_status": "in_progress",
-          "agent": "supervisor",
-          "comment": "Assigned to developer"
-        }
+        "ui"
       ]
     },
     {
       "id": "TICKET-002",
       "type": "feature",
       "title": "Add dark mode toggle",
-      "description": "Add a dark mode toggle button to the Kanban UI that saves preference to localStorage.",
       "status": "done",
-      "priority": "medium",
-      "assignee": "developer",
-      "acceptance_criteria": [
-        "Toggle button in header",
-        "Saves to localStorage",
-        "Applies dark theme CSS"
-      ],
-      "parent": null,
-      "dependencies": [],
       "labels": [
         "ui"
-      ],
-      "estimated_complexity": "S",
-      "created_at": "2026-01-21T11:00:00Z",
-      "updated_at": "2026-01-21T11:30:00Z",
-      "completed_at": "2026-01-21T11:30:00Z",
-      "history": [
-        {
-          "timestamp": "2026-01-21T11:30:00Z",
-          "from_status": "todo",
-          "to_status": "done",
-          "agent": "developer",
-          "comment": "Dark mode toggle implemented with theme persistence"
-        }
       ]
     },
     {
       "id": "BUG-001",
       "type": "bug",
       "title": "Kanban UI does not display tickets",
-      "description": "The Kanban UI was created but does not properly display tickets from .forge/backlog/tickets.json.\n\n## Steps to reproduce\n1. Start server: python3 .forge/ui/server.py\n2. Open http://localhost:8765\n3. No tickets are visible\n\n## Expected\nTickets should appear in their respective columns based on status.\n\n## Root cause\nThe server was returning the entire JSON object instead of just the tickets array. Fixed in commit c5185db by adding proper format handling.",
+      "description": "Fix the UI to properly load and display tickets from the API",
       "status": "done",
       "priority": "high",
-      "assignee": "developer",
       "acceptance_criteria": [
-        "UI displays all tickets from tickets.json",
-        "Tickets appear in correct columns based on status",
-        "Drag and drop updates the JSON file",
-        "Real-time refresh works"
+        "UI displays all tickets",
+        "Correct columns"
       ],
       "labels": [
         "bug",
         "ui"
-      ],
-      "created_at": "2026-01-21T12:00:00Z",
-      "updated_at": "2026-01-21T16:12:00Z",
-      "completed_at": "2026-01-21T16:12:00Z",
-      "history": [
-        {
-          "timestamp": "2026-01-21T15:50:44Z",
-          "from_status": "in_progress",
-          "to_status": "done",
-          "agent": "developer",
-          "comment": "Fixed server to properly extract tickets array from JSON file structure"
-        }
       ]
     },
     {
       "id": "TICKET-003",
       "type": "feature",
-      "title": "Add Product Owner agent to workflow",
-      "description": "## Context\nLe workflow actuel manque de validation. Les tickets sont implémentés sans vérifier que le besoin est clair, et sans valider que l implementation fonctionne réellement.\n\n## Solution\nAjouter un agent Product Owner qui:\n1. Raffine les tickets avant développement (backlog → todo)\n2. Valide les implémentations après done\n3. Crée des bug tickets si la validation échoue\n\n## Acceptance Criteria\n- Agent PO défini dans core/agents/product-owner.md ✓ (déjà fait)\n- PO intégré dans forge-agent-loop.sh\n- PO valide les tickets done et crée bugs si nécessaire\n- Workflow mis à jour: backlog → [PO] → todo → ... → done → [PO validate]",
+      "title": "Add Product Owner agent",
       "status": "backlog",
-      "priority": "high",
-      "assignee": null,
-      "acceptance_criteria": [
-        "Agent PO défini dans core/agents/",
-        "PO intégré dans forge-agent-loop.sh",
-        "PO valide les tickets done",
-        "PO peut créer des bug tickets automatiquement"
-      ],
       "labels": [
-        "workflow",
-        "agent"
-      ],
-      "created_at": "2026-01-21T14:49:03Z",
-      "updated_at": "2026-01-21T14:49:03Z",
-      "history": []
+        "workflow"
+      ]
     },
     {
       "id": "BUG-002",
       "type": "bug",
-      "title": "API POST /api/tickets crashes server",
-      "description": "POST requests to create tickets cause the server to crash with empty reply.\n\n## Steps to reproduce\n1. curl -X POST http://localhost:8765/api/tickets -d {\"title\":\"test\"}\n2. Server returns empty reply (error 52)\n\n## Expected\nTicket should be created and returned as JSON.",
-      "status": "in_progress",
+      "title": "API POST crashes server",
+      "description": "Fix POST endpoint to create tickets without crashing",
+      "status": "todo",
       "priority": "high",
-      "assignee": null,
-      "acceptance_criteria": [
-        "POST creates ticket",
-        "Returns created ticket as JSON",
-        "No server crash"
-      ],
       "labels": [
         "bug",
         "api"
-      ],
-      "created_at": "2026-01-21T14:49:03Z",
-      "updated_at": "2026-01-21T14:49:03Z",
-      "history": []
+      ]
     }
   ]
 }
