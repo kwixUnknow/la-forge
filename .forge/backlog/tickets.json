@@ -1,13 +1,13 @@
 {
   "$schema": "./schema.json",
-  "next_id": 2,
+  "next_id": 3,
   "tickets": [
     {
       "id": "TICKET-001",
       "type": "feature",
       "title": "Create local Kanban UI for ticket management",
       "description": "## Context\nCurrently, tickets are managed via JSON files which is not user-friendly. We need a local web UI (like Jira/Trello) to:\n- Visualize tickets on a Kanban board\n- Drag & drop tickets between columns\n- Create/edit tickets with a form\n- See agent activity in real-time\n- Track ticket history\n\n## Technical Approach\nBuild a lightweight local web app that:\n1. Reads/writes to .forge/backlog/tickets.json\n2. Watches .forge/agent-state/ for real-time updates\n3. Displays agent status and activity\n4. No external dependencies (pure HTML/JS or simple framework)\n\n## Why\nMake La Forge more accessible and provide visual feedback on multi-agent workflow.",
-      "status": "done",
+      "status": "in_progress",
       "priority": "high",
       "assignee": null,
       "acceptance_criteria": [
@@ -54,6 +54,38 @@
           "to_status": "in_progress",
           "agent": "supervisor",
           "comment": "Assigned to developer"
+        }
+      ]
+    },
+    {
+      "id": "TICKET-002",
+      "type": "feature",
+      "title": "Add dark mode toggle",
+      "description": "Add a dark mode toggle button to the Kanban UI that saves preference to localStorage.",
+      "status": "done",
+      "priority": "medium",
+      "assignee": "developer",
+      "acceptance_criteria": [
+        "Toggle button in header",
+        "Saves to localStorage",
+        "Applies dark theme CSS"
+      ],
+      "parent": null,
+      "dependencies": [],
+      "labels": [
+        "ui"
+      ],
+      "estimated_complexity": "S",
+      "created_at": "2026-01-21T11:00:00Z",
+      "updated_at": "2026-01-21T11:30:00Z",
+      "completed_at": "2026-01-21T11:30:00Z",
+      "history": [
+        {
+          "timestamp": "2026-01-21T11:30:00Z",
+          "from_status": "todo",
+          "to_status": "done",
+          "agent": "developer",
+          "comment": "Dark mode toggle implemented with theme persistence"
         }
       ]
     }

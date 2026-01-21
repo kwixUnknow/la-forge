@@ -1,5 +1,5 @@
 #!/bin/bash
-# forge-team.sh - Launch AUTONOMOUS multi-agent team in tmux
+# forge-team.sh - Launch AUTONOMOUS multi-agent team in tmux (split-screen view)
 # Usage: forge-team.sh [project-dir]
 
 PROJECT_DIR="${1:-.}"
@@ -11,7 +11,6 @@ SCRIPTS_DIR="$(cd "$(dirname "$0")" && pwd)"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
 MAGENTA='\033[0;35m'
 CYAN='\033[0;36m'
 NC='\033[0m'
@@ -32,7 +31,6 @@ if ! command -v tmux &> /dev/null; then
     exit 1
 fi
 
-# Ensure agent loop script exists
 AGENT_LOOP="$SCRIPTS_DIR/forge-agent-loop.sh"
 if [ ! -f "$AGENT_LOOP" ]; then
     echo -e "${RED}Error: forge-agent-loop.sh not found${NC}"
@@ -43,58 +41,70 @@ chmod +x "$AGENT_LOOP"
 SESSION="forge-$PROJECT_NAME"
 tmux kill-session -t "$SESSION" 2>/dev/null
 
-echo -e "${GREEN}Creating session: $SESSION${NC}"
+echo -e "${GREEN}Creating split-screen session: $SESSION${NC}"
 echo ""
 
-# Create session with dashboard as first window
-tmux new-session -d -s "$SESSION" -n "dashboard" -c "$PROJECT_DIR"
+# Create session with first pane (supervisor)
+tmux new-session -d -s "$SESSION" -n "agents" -c "$PROJECT_DIR"
+
+# Split into 2x2 grid:
+# +-------------+-------------+
+# | SUPERVISOR  |  DEVELOPER  |
+# +-------------+-------------+
+# |  REVIEWER   |   TESTER    |
+# +-------------+-------------+
+
+# Split horizontally (creates top-right pane for developer)
+tmux split-window -h -t "$SESSION:agents" -c "$PROJECT_DIR"
+
+# Split top-left vertically (creates bottom-left for reviewer)
+tmux split-window -v -t "$SESSION:agents.0" -c "$PROJECT_DIR"
+
+# Split top-right vertically (creates bottom-right for tester)
+tmux split-window -v -t "$SESSION:agents.1" -c "$PROJECT_DIR"
+
+# Now panes are: 0=supervisor, 1=reviewer, 2=developer, 3=tester
+# Let's label them with a header and start the agents
+
+# Pane 0 - Supervisor (top-left)
+tmux send-keys -t "$SESSION:agents.0" "echo -e '${MAGENTA}=== SUPERVISOR ===${NC}'; bash '$AGENT_LOOP' supervisor '$PROJECT_DIR'" C-m
+
+# Pane 1 - Reviewer (bottom-left)
+tmux send-keys -t "$SESSION:agents.1" "echo -e '${RED}=== CODE-REVIEWER ===${NC}'; bash '$AGENT_LOOP' code-reviewer '$PROJECT_DIR'" C-m
+
+# Pane 2 - Developer (top-right)
+tmux send-keys -t "$SESSION:agents.2" "echo -e '${GREEN}=== DEVELOPER ===${NC}'; bash '$AGENT_LOOP' developer '$PROJECT_DIR'" C-m
+
+# Pane 3 - Tester (bottom-right)
+tmux send-keys -t "$SESSION:agents.3" "echo -e '${YELLOW}=== QA-TESTER ===${NC}'; bash '$AGENT_LOOP' qa-tester '$PROJECT_DIR'" C-m
+
+# Keep panes open if agent exits
 tmux set -t "$SESSION" remain-on-exit on
 
-# Create agent windows
-tmux new-window -t "$SESSION" -n "supervisor" -c "$PROJECT_DIR"
-tmux new-window -t "$SESSION" -n "developer" -c "$PROJECT_DIR"
-tmux new-window -t "$SESSION" -n "reviewer" -c "$PROJECT_DIR"
-tmux new-window -t "$SESSION" -n "tester" -c "$PROJECT_DIR"
-
-# Start dashboard (using bash loop instead of watch for macOS compatibility)
+# Create a second window for dashboard (optional, Ctrl+b n to switch)
+tmux new-window -t "$SESSION" -n "dashboard" -c "$PROJECT_DIR"
 tmux send-keys -t "$SESSION:dashboard" "while true; do clear; echo '=== FORGE DASHBOARD ==='; echo ''; echo 'TICKETS:'; jq -r '.tickets[] | \"  \\(.id): \\(.status)\"' .forge/backlog/tickets.json 2>/dev/null; echo ''; echo 'INBOXES:'; echo \"  Developer: \$(jq '.pending_tasks | length' .forge/agent-state/developer/inbox.json 2>/dev/null) tasks\"; echo \"  Reviewer: \$(jq '.pending_tasks | length' .forge/agent-state/code-reviewer/inbox.json 2>/dev/null) tasks\"; echo \"  QA: \$(jq '.pending_tasks | length' .forge/agent-state/qa-tester/inbox.json 2>/dev/null) tasks\"; echo ''; echo 'Updated:' \$(date '+%H:%M:%S'); sleep 2; done" C-m
 
-echo -e "Agents (${CYAN}AUTONOMOUS${NC}):"
-echo -e "  ${MAGENTA}supervisor${NC} - Haiku - Assigns tickets"
-echo -e "  ${GREEN}developer${NC}  - Sonnet - Implements code"
-echo -e "  ${RED}reviewer${NC}   - Haiku - Reviews code"
-echo -e "  ${YELLOW}tester${NC}     - Haiku - Tests code"
-echo ""
+# Go back to agents window
+tmux select-window -t "$SESSION:agents"
 
-# Start AUTONOMOUS agent loops in each window
-echo "Starting autonomous agent loops..."
-tmux send-keys -t "$SESSION:supervisor" "bash '$AGENT_LOOP' supervisor '$PROJECT_DIR'" C-m
-sleep 0.5
-tmux send-keys -t "$SESSION:developer" "bash '$AGENT_LOOP' developer '$PROJECT_DIR'" C-m
-sleep 0.5
-tmux send-keys -t "$SESSION:reviewer" "bash '$AGENT_LOOP' code-reviewer '$PROJECT_DIR'" C-m
-sleep 0.5
-tmux send-keys -t "$SESSION:tester" "bash '$AGENT_LOOP' qa-tester '$PROJECT_DIR'" C-m
-
+echo -e "Layout (${CYAN}2x2 split-screen${NC}):"
 echo ""
-echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  Autonomous Team Running!${NC}"
-echo -e "${GREEN}========================================${NC}"
+echo "  +---------------+---------------+"
+echo -e "  | ${MAGENTA}SUPERVISOR${NC}    | ${GREEN}DEVELOPER${NC}     |"
+echo "  +---------------+---------------+"
+echo -e "  | ${RED}REVIEWER${NC}      | ${YELLOW}TESTER${NC}        |"
+echo "  +---------------+---------------+"
 echo ""
-echo "Windows:"
-echo "  0: dashboard  - Real-time status"
-echo "  1: supervisor - Automatically assigns todo tickets"
-echo "  2: developer  - Automatically implements tickets"
-echo "  3: reviewer   - Automatically reviews code"
-echo "  4: tester     - Automatically tests and marks done"
+echo "Navigation:"
+echo "  Ctrl+b arrow  - Move between panes"
+echo "  Ctrl+b n      - Switch to dashboard"
+echo "  Ctrl+b z      - Zoom current pane (toggle)"
 echo ""
-echo -e "The agents run in a loop: ${CYAN}todo → in_progress → review → testing → done${NC}"
-echo ""
-echo "Attach: tmux attach -t $SESSION"
+echo -e "Workflow: ${CYAN}todo → in_progress → review → testing → done${NC}"
 echo ""
 
 read -p "Attach now? [Y/n] " response
 if [[ ! "$response" =~ ^[Nn]$ ]]; then
-    tmux select-window -t "$SESSION:dashboard"
     tmux attach -t "$SESSION"
 fi

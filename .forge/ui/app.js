@@ -4,10 +4,40 @@ let draggedTicket = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    initializeTheme();
     setupDragAndDrop();
     loadTickets();
     startPolling();
 });
+
+// Theme management
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+
+    if (theme === 'light') {
+        document.body.classList.add('light-mode');
+        updateThemeIcon('☀️');
+    } else {
+        updateThemeIcon('🌙');
+    }
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light-mode');
+    const theme = isLight ? 'light' : 'dark';
+
+    localStorage.setItem('theme', theme);
+    updateThemeIcon(isLight ? '☀️' : '🌙');
+}
+
+function updateThemeIcon(icon) {
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.textContent = icon;
+    }
+}
 
 // Load tickets from backend
 async function loadTickets() {
