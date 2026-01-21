@@ -39,14 +39,31 @@ class TicketManager:
         """Read tickets from file"""
         try:
             with open(self.tickets_file, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Handle both array and object format
+                if isinstance(data, dict) and 'tickets' in data:
+                    return data['tickets']
+                elif isinstance(data, list):
+                    return data
+                return []
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
     def _write_tickets(self, tickets: list):
         """Write tickets to file"""
+        # Read existing data to preserve schema and next_id
+        try:
+            with open(self.tickets_file, 'r') as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    data['tickets'] = tickets
+                else:
+                    data = tickets
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = tickets
+
         with open(self.tickets_file, 'w') as f:
-            json.dump(tickets, f, indent=2)
+            json.dump(data, f, indent=2)
 
     def get_all(self) -> list:
         """Get all tickets"""
@@ -61,24 +78,47 @@ class TicketManager:
         """Create new ticket"""
         tickets = self._read_tickets()
 
-        # Generate ID
-        max_num = 0
-        for t in tickets:
-            if t['id'].startswith('TICKET-'):
-                try:
-                    num = int(t['id'].split('-')[1])
-                    max_num = max(max_num, num)
-                except (IndexError, ValueError):
-                    pass
+        # Read full data to get next_id
+        try:
+            with open(self.tickets_file, 'r') as f:
+                full_data = json.load(f)
+                if isinstance(full_data, dict) and 'next_id' in full_data:
+                    next_id = full_data['next_id']
+                    ticket_type = data.get('type', 'feature')
+                    prefix = 'TICKET' if ticket_type == 'feature' else ticket_type.upper()
+                    ticket_id = f'{prefix}-{str(next_id).zfill(3)}'
+                    full_data['next_id'] = next_id + 1
+                else:
+                    # Fallback to old logic
+                    max_num = 0
+                    for t in tickets:
+                        if t['id'].startswith('TICKET-'):
+                            try:
+                                num = int(t['id'].split('-')[1])
+                                max_num = max(max_num, num)
+                            except (IndexError, ValueError):
+                                pass
+                    ticket_id = f'TICKET-{str(max_num + 1).zfill(3)}'
+        except (FileNotFoundError, json.JSONDecodeError):
+            ticket_id = 'TICKET-001'
 
         ticket = {
-            'id': f'TICKET-{str(max_num + 1).zfill(3)}',
+            'id': ticket_id,
+            'type': data.get('type', 'feature'),
             'title': data['title'],
-            'description': data['description'],
+            'description': data.get('description', ''),
             'status': data.get('status', 'backlog'),
+            'priority': data.get('priority', 'medium'),
             'assignee': data.get('assignee'),
+            'acceptance_criteria': data.get('acceptance_criteria', []),
+            'parent': data.get('parent'),
+            'dependencies': data.get('dependencies', []),
+            'labels': data.get('labels', []),
+            'estimated_complexity': data.get('estimated_complexity'),
             'created_at': datetime.now().isoformat(),
             'updated_at': datetime.now().isoformat(),
+            'started_at': data.get('started_at'),
+            'completed_at': data.get('completed_at'),
             'history': []
         }
 
