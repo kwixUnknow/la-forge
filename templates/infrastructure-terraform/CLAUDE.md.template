@@ -1,0 +1,189 @@
+# {{PROJECT_NAME}} - Infrastructure
+
+## Contexte Métier
+{{BUSINESS_CONTEXT}}
+
+## Objectif
+{{INFRASTRUCTURE_GOAL}}
+
+## Critères de Succès
+{{SUCCESS_CRITERIA}}
+
+---
+
+## Quick Start
+
+```bash
+# Init Terraform
+cd environments/dev
+terraform init
+
+# Plan
+terraform plan -out=plan.tfplan
+
+# Apply
+terraform apply plan.tfplan
+
+# Destroy (attention!)
+terraform destroy
+```
+
+## Architecture
+
+### Stack Technique
+- **IaC** : Terraform 1.5+
+- **Provider** : AWS
+- **State** : S3 + DynamoDB
+- **CI/CD** : {{CICD}}
+
+### Infrastructure Overview
+```
+{{ARCHITECTURE_DIAGRAM}}
+```
+
+### Structure du Projet
+```
+{{PROJECT_NAME}}/
+├── modules/                 # Modules réutilisables
+│   ├── networking/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── compute/
+│   ├── database/
+│   ├── storage/
+│   └── security/
+├── environments/            # Configurations par env
+│   ├── dev/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   ├── terraform.tfvars
+│   │   └── backend.tf
+│   ├── staging/
+│   └── prod/
+├── scripts/
+│   ├── init-backend.sh     # Init S3/DynamoDB pour state
+│   └── plan-all.sh         # Plan tous les envs
+├── docs/
+│   ├── architecture.md
+│   ├── runbook.md
+│   └── disaster-recovery.md
+└── .github/
+    └── workflows/
+        └── terraform.yml    # CI/CD
+```
+
+## Conventions
+
+### Naming
+```
+{project}-{env}-{resource}-{identifier}
+
+Exemples:
+- myapp-prod-vpc-main
+- myapp-dev-rds-primary
+- myapp-staging-lambda-processor
+```
+
+### Tagging (OBLIGATOIRE)
+```hcl
+locals {
+  common_tags = {
+    Project     = "{{PROJECT_NAME}}"
+    Environment = var.environment
+    ManagedBy   = "terraform"
+    Owner       = "thomas"
+    CostCenter  = "{{COST_CENTER}}"
+  }
+}
+```
+
+### Modules
+- Un module = une responsabilité
+- Variables avec types et descriptions
+- Outputs documentés
+- README.md dans chaque module
+
+### State Management
+```hcl
+# backend.tf
+terraform {
+  backend "s3" {
+    bucket         = "{{STATE_BUCKET}}"
+    key            = "{{PROJECT_NAME}}/{{ENV}}/terraform.tfstate"
+    region         = "eu-west-1"
+    encrypt        = true
+    dynamodb_table = "terraform-locks"
+  }
+}
+```
+
+## Ressources Déployées
+
+### Networking
+{{NETWORKING_RESOURCES}}
+
+### Compute
+{{COMPUTE_RESOURCES}}
+
+### Database
+{{DATABASE_RESOURCES}}
+
+### Storage
+{{STORAGE_RESOURCES}}
+
+### Security
+{{SECURITY_RESOURCES}}
+
+## Environnements
+
+| Env | Purpose | Sizing | Cost Estimate |
+|-----|---------|--------|---------------|
+| dev | Development | Minimal | ~$50/month |
+| staging | Pre-prod testing | Medium | ~$150/month |
+| prod | Production | Full | ~$XXX/month |
+
+## Secrets Management
+
+- Secrets dans AWS Secrets Manager
+- Référencés via data sources, jamais en dur
+- Rotation automatique si possible
+
+```hcl
+data "aws_secretsmanager_secret_version" "db_password" {
+  secret_id = "{{PROJECT_NAME}}/{{ENV}}/db-password"
+}
+```
+
+## Scope
+
+### Phase 1
+{{PHASE1_SCOPE}}
+
+### Phase 2
+{{PHASE2_SCOPE}}
+
+## Contraintes
+{{CONSTRAINTS}}
+
+## Disaster Recovery
+
+### Backup Strategy
+{{BACKUP_STRATEGY}}
+
+### RTO/RPO
+- RTO: {{RTO}}
+- RPO: {{RPO}}
+
+---
+
+## Guidelines Héritées
+
+Ce projet hérite des guidelines globales de `~/.claude/CLAUDE.md` :
+- Règles de sécurité AWS
+- Conventions de tagging
+- Workflow git
+
+Et a accès aux commands/skills globaux :
+- `/refactor`, `/debug`, `/test`, `/review`, `/security-check`
+- Skills : aws-expert

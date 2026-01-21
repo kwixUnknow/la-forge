@@ -1,0 +1,17 @@
+{
+  "extraKnownMarketplaces": {
+    "la-forge": {
+      "source": {
+        "source": "path",
+        "path": "~/la-forge"
+      }
+    }
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run:*)",
+      "Bash(npx:*)",
+      "Bash(git:*)"
+    ]
+  }
+}

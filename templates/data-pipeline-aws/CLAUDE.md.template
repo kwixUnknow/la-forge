@@ -1,0 +1,244 @@
+# {{PROJECT_NAME}}
+
+## Identité Projet
+
+| Attribut | Valeur |
+|----------|--------|
+| **Type** | data-pipeline-aws |
+| **Client** | {{CLIENT_NAME}} |
+| **Project ID** | {{PROJECT_ID}} |
+| **Créé le** | {{CREATED_AT}} |
+
+## Contexte Métier
+{{BUSINESS_CONTEXT}}
+
+## Utilisateurs
+{{USERS_DESCRIPTION}}
+
+## Problème Résolu
+{{PROBLEM_STATEMENT}}
+
+## Critères de Succès
+{{SUCCESS_CRITERIA}}
+
+---
+
+## Isolation - CRITIQUE
+
+### Identifiants
+```
+PROJECT_ID={{PROJECT_ID}}
+PROJECT_NAME={{PROJECT_NAME}}
+CLIENT={{CLIENT_NAME}}
+```
+
+### AWS Tagging OBLIGATOIRE (NON-NÉGOCIABLE)
+
+**⚠️ TOUTE ressource AWS sans ces tags est NON-CONFORME.**
+
+```hcl
+# Dans terraform.tfvars
+project_name = "{{PROJECT_NAME}}"
+client_name  = "{{CLIENT_NAME}}"
+
+# Tags appliqués automatiquement via provider default_tags
+tags = {
+  Project            = "{{PROJECT_NAME}}"
+  Environment        = var.environment
+  Owner              = "thomas"
+  CostCenter         = "{{CLIENT_NAME}}"
+  ManagedBy          = "terraform"
+  CreatedBy          = "la-forge"
+  DataClassification = "internal"
+}
+```
+
+### Isolation S3
+```
+s3://company-data-lake-{env}/{{PROJECT_NAME}}/
+├── raw/
+├── processed/
+└── curated/
+```
+
+### Isolation Glue Catalog
+```sql
+-- Database dédiée par projet
+CREATE DATABASE {{PROJECT_NAME}}_${environment};
+```
+
+### Nommage AWS Resources
+```
+{{PROJECT_NAME}}-{environment}-{resource_type}-{identifier}
+
+Exemples:
+  {{PROJECT_NAME}}-prod-lambda-processor
+  {{PROJECT_NAME}}-dev-glue-etl-events
+  {{PROJECT_NAME}}-staging-s3-data-lake
+```
+
+### Dépendances Isolées
+- **Virtual env**: `.venv/` dans le projet uniquement
+- **Lambda layers**: Versions spécifiques au projet
+- **Glue**: Jobs avec leur propre config
+
+---
+
+## Quick Start
+
+```bash
+# Setup Python (pour scripts/Glue jobs locaux)
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Terraform - VÉRIFIER LES TAGS AVANT APPLY
+cd infrastructure/
+terraform init
+terraform plan -var-file=environments/dev.tfvars
+# Vérifier que tous les tags sont présents dans le plan
+terraform apply -var-file=environments/dev.tfvars
+
+# Tests locaux
+pytest tests/
+
+# Deploy Lambda (si applicable)
+./scripts/deploy-lambda.sh dev
+```
+
+## Architecture
+
+### Stack Technique
+- **IaC** : Terraform
+- **Compute** : {{COMPUTE}} (Lambda / Glue / Step Functions)
+- **Storage** : S3
+- **Database** : {{DATABASE}} (Athena / Redshift / RDS)
+- **Orchestration** : {{ORCHESTRATION}} (Step Functions / EventBridge / Airflow)
+- **Monitoring** : CloudWatch
+
+### Pipeline Flow
+```
+{{PIPELINE_DIAGRAM}}
+```
+
+### Structure du Projet
+```
+{{PROJECT_NAME}}/
+├── infrastructure/          # Terraform IaC
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── modules/
+│   │   ├── s3/
+│   │   ├── lambda/
+│   │   ├── glue/
+│   │   └── ...
+│   └── environments/
+│       ├── dev.tfvars
+│       ├── staging.tfvars
+│       └── prod.tfvars
+├── src/
+│   ├── lambdas/            # Lambda functions
+│   │   └── {{function}}/
+│   │       ├── handler.py
+│   │       └── requirements.txt
+│   ├── glue/               # Glue jobs
+│   │   └── {{job}}/
+│   │       └── job.py
+│   └── common/             # Shared code
+│       ├── __init__.py
+│       └── utils.py
+├── tests/
+│   ├── unit/
+│   └── integration/
+├── scripts/                # Deploy/utility scripts
+├── docs/
+│   ├── architecture.md
+│   └── runbook.md
+└── data/                   # Sample data for testing
+    └── samples/
+```
+
+## Conventions
+
+### Terraform
+- Un module par ressource logique
+- Variables avec descriptions et types
+- Outputs pour les valeurs utiles
+- State dans S3 avec DynamoDB locking
+
+### Data
+- Formats : Parquet (préféré), JSON, CSV
+- Partitioning : par date (`year=YYYY/month=MM/day=DD`)
+- Naming : `{env}/{domain}/{table}/`
+
+### Lambda
+- Handler minimal, logique dans modules
+- Layers pour dépendances communes
+- Timeout et memory adaptés
+- Dead Letter Queue pour erreurs
+
+### Glue
+- PySpark ou Python Shell selon volume
+- Job bookmarks pour incremental
+- Cataloging des tables
+
+## Variables d'Environnement
+
+### Terraform Variables
+```hcl
+{{TERRAFORM_VARIABLES}}
+```
+
+### Lambda/Glue Variables
+```
+{{ENV_VARIABLES}}
+```
+
+## Data Flow
+
+### Sources
+{{DATA_SOURCES}}
+
+### Transformations
+{{TRANSFORMATIONS}}
+
+### Destinations
+{{DATA_DESTINATIONS}}
+
+## Scope
+
+### MVP
+{{MVP_SCOPE}}
+
+### V2+
+{{FUTURE_SCOPE}}
+
+## Contraintes
+{{CONSTRAINTS}}
+
+## Monitoring & Alerting
+
+### Métriques Clés
+- Durée des jobs
+- Volume de données traité
+- Erreurs / échecs
+- Coûts
+
+### Alertes
+- Job failure → Slack/PagerDuty
+- Duration > threshold → Warning
+- Cost anomaly → Email
+
+---
+
+## Guidelines Héritées
+
+Ce projet hérite des guidelines globales de `~/.claude/CLAUDE.md` :
+- Conventions de code
+- Règles de sécurité AWS
+- Workflow git
+
+Et a accès aux commands/skills globaux :
+- `/refactor`, `/debug`, `/test`, `/review`, `/security-check`
+- Skills : aws-expert, terraform-expert, data-engineer, code-reviewer

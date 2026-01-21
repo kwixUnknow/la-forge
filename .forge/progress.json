@@ -1,0 +1,44 @@
+{
+  "last_updated": null,
+  "project": "la-forge",
+  "sprint": null,
+  "tickets_by_status": {
+    "backlog": 0,
+    "todo": 0,
+    "in_progress": 0,
+    "review": 0,
+    "testing": 0,
+    "done": 0
+  },
+  "agents_status": {
+    "supervisor": {
+      "status": "idle",
+      "current_ticket": "",
+      "last_active": "2026-01-21T08:38:27Z"
+    },
+    "developer": {
+      "status": "idle",
+      "current_ticket": null,
+      "last_active": null
+    },
+    "code-reviewer": {
+      "status": "idle",
+      "current_ticket": null,
+      "last_active": null
+    },
+    "qa-tester": {
+      "status": "idle",
+      "current_ticket": null,
+      "last_active": null
+    }
+  },
+  "recent_activity": [
+    {
+      "timestamp": "2026-01-21T08:35:56Z",
+      "agent": "supervisor",
+      "action": "Assigned ticket",
+      "ticket": "TICKET-001"
+    }
+  ],
+  "blockers": []
+}

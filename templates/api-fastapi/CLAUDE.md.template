@@ -1,0 +1,198 @@
+# {{PROJECT_NAME}}
+
+## Identité Projet
+
+| Attribut | Valeur |
+|----------|--------|
+| **Type** | api-fastapi |
+| **Client** | {{CLIENT_NAME}} |
+| **Project ID** | {{PROJECT_ID}} |
+| **Créé le** | {{CREATED_AT}} |
+
+## Contexte Métier
+{{BUSINESS_CONTEXT}}
+
+## Utilisateurs
+{{USERS_DESCRIPTION}}
+
+## Problème Résolu
+{{PROBLEM_STATEMENT}}
+
+## Critères de Succès
+{{SUCCESS_CRITERIA}}
+
+---
+
+## Isolation - CRITIQUE
+
+### Identifiants
+```
+PROJECT_ID={{PROJECT_ID}}
+PROJECT_NAME={{PROJECT_NAME}}
+CLIENT={{CLIENT_NAME}}
+```
+
+### Ports Assignés (voir .env.ports)
+```
+API_PORT=50{{PROJECT_ID}}
+POSTGRES_PORT=54{{PROJECT_ID}}
+REDIS_PORT=63{{PROJECT_ID}}
+```
+
+### AWS Tagging OBLIGATOIRE
+Toute ressource AWS doit inclure ces tags :
+```hcl
+tags = {
+  Project     = "{{PROJECT_NAME}}"
+  Environment = var.environment
+  Owner       = "thomas"
+  CostCenter  = "{{CLIENT_NAME}}"
+  ManagedBy   = "terraform"
+  CreatedBy   = "la-forge"
+}
+```
+
+### Dépendances Isolées
+- **Virtual env**: `.venv/` dans le projet uniquement
+- **JAMAIS** d'installation globale ou avec `sudo pip`
+- Utiliser `pip install -e ".[dev]"` pour le dev
+
+---
+
+## Quick Start
+
+```bash
+# Démarrer l'environnement (DB, Redis, etc.)
+docker compose up -d
+
+# Setup environnement Python (isolé dans le projet)
+python -m venv .venv
+source .venv/bin/activate  # ou .venv\Scripts\activate sur Windows
+
+# Installation
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Développement (port isolé)
+uvicorn src.main:app --reload --port 50{{PROJECT_ID}}
+# http://localhost:50{{PROJECT_ID}}/docs
+
+# Tests
+pytest
+
+# Linting
+ruff check .
+ruff format .
+
+# Type checking
+mypy src/
+
+# Arrêter l'environnement
+docker compose down
+```
+
+### Database Connection
+Utilise le port isolé : `postgresql://user:pass@localhost:54{{PROJECT_ID}}/{{PROJECT_NAME}}`
+
+## Architecture
+
+### Stack Technique
+- **Framework** : FastAPI
+- **Language** : Python 3.11+
+- **Database** : {{DATABASE}}
+- **ORM** : SQLAlchemy 2.0 / SQLModel
+- **Auth** : {{AUTH_PROVIDER}}
+- **Deployment** : {{DEPLOYMENT}}
+
+### Structure du Projet
+```
+{{PROJECT_NAME}}/
+├── src/
+│   ├── __init__.py
+│   ├── main.py              # FastAPI app entry
+│   ├── config.py            # Settings (pydantic-settings)
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── deps.py          # Dependencies (DB, auth)
+│   │   └── v1/
+│   │       ├── __init__.py
+│   │       ├── router.py    # API router
+│   │       └── endpoints/   # Route handlers
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── security.py      # Auth utilities
+│   │   └── exceptions.py    # Custom exceptions
+│   ├── models/              # SQLAlchemy models
+│   ├── schemas/             # Pydantic schemas
+│   ├── services/            # Business logic
+│   └── db/
+│       ├── __init__.py
+│       ├── session.py       # DB session
+│       └── migrations/      # Alembic migrations
+├── tests/
+│   ├── conftest.py
+│   ├── unit/
+│   └── integration/
+├── scripts/                 # Utility scripts
+├── docs/                    # Documentation
+├── pyproject.toml           # Project config
+├── requirements.txt         # Production deps
+└── requirements-dev.txt     # Dev deps
+```
+
+## Conventions
+
+### API Design
+- RESTful endpoints
+- Versioning : `/api/v1/`
+- Response format : `{"data": ..., "meta": ...}` ou `{"error": ...}`
+- Pagination : `?page=1&limit=20`
+
+### Naming
+- Modules : snake_case (`user_service.py`)
+- Classes : PascalCase (`UserService`)
+- Functions : snake_case (`get_user_by_id`)
+- Constants : UPPER_SNAKE_CASE (`MAX_RETRIES`)
+
+### Type Hints
+- Obligatoires pour toutes les fonctions publiques
+- Utiliser `typing` et `typing_extensions`
+- Pydantic pour la validation
+
+### Error Handling
+- Custom exceptions dans `core/exceptions.py`
+- HTTP exceptions avec codes appropriés
+- Logging structuré
+
+## Variables d'Environnement
+
+Requis dans `.env` :
+```
+{{ENV_VARIABLES}}
+```
+
+Voir `.env.example` pour le template.
+
+## Scope
+
+### MVP
+{{MVP_SCOPE}}
+
+### V2+
+{{FUTURE_SCOPE}}
+
+## Contraintes
+{{CONSTRAINTS}}
+
+---
+
+## Guidelines Héritées
+
+Ce projet hérite des guidelines globales de `~/.claude/CLAUDE.md` :
+- Conventions de code
+- Règles de sécurité
+- Workflow git
+
+Et a accès aux commands/skills globaux :
+- `/refactor`, `/debug`, `/test`, `/review`, `/security-check`
+- Skills : aws-expert, code-reviewer

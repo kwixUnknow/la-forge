@@ -1,0 +1,119 @@
+# Template Docker Compose pour projets La Forge
+# Ce fichier est copié et adapté pour chaque projet
+#
+# Variables requises (via .env.ports généré par forge-isolation):
+#   PROJECT_ID, PROJECT_NAME
+#   WEB_PORT, API_PORT, POSTGRES_PORT, REDIS_PORT, etc.
+
+version: '3.8'
+
+# Réseau isolé par projet
+networks:
+  ${PROJECT_NAME}-network:
+    name: ${PROJECT_NAME}-network
+    driver: bridge
+
+# Volumes nommés pour persistance
+volumes:
+  ${PROJECT_NAME}-postgres-data:
+  ${PROJECT_NAME}-redis-data:
+
+services:
+  # ============================================================
+  # DATABASE - PostgreSQL
+  # ============================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${PROJECT_NAME}-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-${PROJECT_NAME}}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - ${PROJECT_NAME}-postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ${PROJECT_NAME}-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "project=${PROJECT_NAME}"
+      - "project.id=${PROJECT_ID}"
+      - "managed-by=la-forge"
+
+  # ============================================================
+  # CACHE - Redis
+  # ============================================================
+  redis:
+    image: redis:7-alpine
+    container_name: ${PROJECT_NAME}-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ${PROJECT_NAME}-redis-data:/data
+    networks:
+      - ${PROJECT_NAME}-network
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    labels:
+      - "project=${PROJECT_NAME}"
+      - "project.id=${PROJECT_ID}"
+      - "managed-by=la-forge"
+
+  # ============================================================
+  # TOOLS - Adminer (DB GUI)
+  # ============================================================
+  adminer:
+    image: adminer:latest
+    container_name: ${PROJECT_NAME}-adminer
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    networks:
+      - ${PROJECT_NAME}-network
+    depends_on:
+      - postgres
+    labels:
+      - "project=${PROJECT_NAME}"
+      - "project.id=${PROJECT_ID}"
+      - "managed-by=la-forge"
+    profiles:
+      - tools
+
+  # ============================================================
+  # TOOLS - MailHog (Email testing)
+  # ============================================================
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ${PROJECT_NAME}-mailhog
+    restart: unless-stopped
+    ports:
+      - "${MAILHOG_PORT:-8025}:8025"    # Web UI
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"  # SMTP
+    networks:
+      - ${PROJECT_NAME}-network
+    labels:
+      - "project=${PROJECT_NAME}"
+      - "project.id=${PROJECT_ID}"
+      - "managed-by=la-forge"
+    profiles:
+      - tools
+
+# ============================================================
+# PROFILES
+# ============================================================
+# Usage:
+#   docker compose up -d                    # Core services only
+#   docker compose --profile tools up -d    # With dev tools
+#   docker compose --profile all up -d      # Everything

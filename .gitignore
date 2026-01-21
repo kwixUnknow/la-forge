@@ -1,0 +1,16 @@
+# Ignorer les fichiers locaux
+.DS_Store
+*.local.*
+.claude/settings.local.json
+CLAUDE.local.md
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+
+# Forge agent state (transient)
+.forge/agent-state/
+.forge/kanban-db/
+.forge/metrics.json

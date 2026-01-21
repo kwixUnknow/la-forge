@@ -1,0 +1,10 @@
+{
+  "extraKnownMarketplaces": {
+    "la-forge": {
+      "source": {
+        "source": "path",
+        "path": "~/la-forge"
+      }
+    }
+  }
+}

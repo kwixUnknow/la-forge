@@ -1,0 +1,61 @@
+{
+  "$schema": "./schema.json",
+  "next_id": 2,
+  "tickets": [
+    {
+      "id": "TICKET-001",
+      "type": "feature",
+      "title": "Create local Kanban UI for ticket management",
+      "description": "## Context\nCurrently, tickets are managed via JSON files which is not user-friendly. We need a local web UI (like Jira/Trello) to:\n- Visualize tickets on a Kanban board\n- Drag & drop tickets between columns\n- Create/edit tickets with a form\n- See agent activity in real-time\n- Track ticket history\n\n## Technical Approach\nBuild a lightweight local web app that:\n1. Reads/writes to .forge/backlog/tickets.json\n2. Watches .forge/agent-state/ for real-time updates\n3. Displays agent status and activity\n4. No external dependencies (pure HTML/JS or simple framework)\n\n## Why\nMake La Forge more accessible and provide visual feedback on multi-agent workflow.",
+      "status": "done",
+      "priority": "high",
+      "assignee": null,
+      "acceptance_criteria": [
+        "Kanban board with columns: backlog, todo, in_progress, review, testing, done",
+        "Drag & drop to move tickets between columns (updates JSON)",
+        "Click ticket to see details and edit",
+        "Form to create new tickets",
+        "Real-time display of agent status (idle/working/blocked)",
+        "Activity feed showing recent agent actions",
+        "Auto-refresh when files change",
+        "Works offline (no external API calls)",
+        "Single command to launch: forge-ui.sh"
+      ],
+      "parent": null,
+      "dependencies": [],
+      "labels": [
+        "ui",
+        "dx",
+        "priority"
+      ],
+      "estimated_complexity": "L",
+      "created_at": "2026-01-21T16:00:00Z",
+      "updated_at": "2026-01-21T08:35:56Z",
+      "started_at": null,
+      "completed_at": null,
+      "history": [
+        {
+          "timestamp": "2026-01-21T16:00:00Z",
+          "from_status": null,
+          "to_status": "todo",
+          "agent": "thomas",
+          "comment": "Created ticket for Kanban UI"
+        },
+        {
+          "timestamp": "2026-01-21T08:35:36Z",
+          "from_status": "todo",
+          "to_status": "in_progress",
+          "agent": "supervisor",
+          "comment": "Assigned to developer"
+        },
+        {
+          "timestamp": "2026-01-21T08:35:56Z",
+          "from_status": "todo",
+          "to_status": "in_progress",
+          "agent": "supervisor",
+          "comment": "Assigned to developer"
+        }
+      ]
+    }
+  ]
+}

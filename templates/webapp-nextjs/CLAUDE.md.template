@@ -1,0 +1,180 @@
+# {{PROJECT_NAME}}
+
+## Identité Projet
+
+| Attribut | Valeur |
+|----------|--------|
+| **Type** | webapp-nextjs |
+| **Client** | {{CLIENT_NAME}} |
+| **Project ID** | {{PROJECT_ID}} |
+| **Créé le** | {{CREATED_AT}} |
+
+## Contexte Métier
+{{BUSINESS_CONTEXT}}
+
+## Utilisateurs
+{{USERS_DESCRIPTION}}
+
+## Problème Résolu
+{{PROBLEM_STATEMENT}}
+
+## Critères de Succès
+{{SUCCESS_CRITERIA}}
+
+---
+
+## Isolation - CRITIQUE
+
+### Identifiants
+```
+PROJECT_ID={{PROJECT_ID}}
+PROJECT_NAME={{PROJECT_NAME}}
+CLIENT={{CLIENT_NAME}}
+```
+
+### Ports Assignés (voir .env.ports)
+```
+WEB_PORT=30{{PROJECT_ID}}
+API_PORT=50{{PROJECT_ID}}
+POSTGRES_PORT=54{{PROJECT_ID}}
+REDIS_PORT=63{{PROJECT_ID}}
+```
+
+### AWS Tagging OBLIGATOIRE
+Toute ressource AWS doit inclure ces tags :
+```hcl
+tags = {
+  Project     = "{{PROJECT_NAME}}"
+  Environment = var.environment
+  Owner       = "thomas"
+  CostCenter  = "{{CLIENT_NAME}}"
+  ManagedBy   = "terraform"
+  CreatedBy   = "la-forge"
+}
+```
+
+### Dépendances Isolées
+- **Node modules**: Local `./node_modules/` uniquement
+- **JAMAIS** d'installation globale
+- Utiliser `npm ci` pour builds reproductibles
+
+---
+
+## Quick Start
+
+```bash
+# Démarrer l'environnement (DB, Redis, etc.)
+docker compose up -d
+
+# Installation des dépendances
+npm install
+
+# Développement (port isolé)
+npm run dev              # http://localhost:30{{PROJECT_ID}}
+
+# Tests
+npm test
+
+# Build
+npm run build
+
+# Linting
+npm run lint
+
+# Arrêter l'environnement
+docker compose down
+```
+
+## Architecture
+
+### Stack Technique
+- **Framework** : Next.js 15 (App Router)
+- **Language** : TypeScript (strict mode)
+- **Styling** : Tailwind CSS
+- **Database** : {{DATABASE}}
+- **Auth** : {{AUTH_PROVIDER}}
+- **Deployment** : {{DEPLOYMENT}}
+
+### Structure du Projet
+```
+{{PROJECT_NAME}}/
+├── src/
+│   ├── app/                 # App Router pages
+│   │   ├── (auth)/         # Routes authentifiées
+│   │   ├── (public)/       # Routes publiques
+│   │   ├── api/            # API Routes
+│   │   ├── layout.tsx      # Root layout
+│   │   └── page.tsx        # Home page
+│   ├── components/
+│   │   ├── ui/             # Composants UI réutilisables
+│   │   └── features/       # Composants par feature
+│   ├── lib/                # Utilitaires
+│   │   ├── db/             # Database client
+│   │   ├── auth/           # Auth utilities
+│   │   └── utils/          # Helpers
+│   ├── server/             # Server-only code
+│   │   ├── actions/        # Server Actions
+│   │   └── services/       # Business logic
+│   └── types/              # TypeScript types
+├── public/                 # Static assets
+├── tests/                  # Tests
+└── docs/                   # Documentation
+```
+
+## Conventions
+
+### Components
+- Server Components par défaut
+- `'use client'` uniquement si nécessaire (interactivité, hooks)
+- Un composant = un fichier
+- Props typées avec interface
+
+### Data Fetching
+- Server Components pour le data initial
+- Server Actions pour les mutations
+- `revalidatePath()` / `revalidateTag()` pour le cache
+
+### Naming
+- Components : PascalCase (`UserProfile.tsx`)
+- Utilities : camelCase (`formatDate.ts`)
+- Types : PascalCase avec suffix (`UserType`, `UserProps`)
+- Server Actions : camelCase avec prefix `action` (`actionCreateUser`)
+
+### Error Handling
+- `error.tsx` au niveau route
+- Try/catch dans les Server Actions
+- Toast pour feedback utilisateur
+- Logging côté serveur
+
+## Variables d'Environnement
+
+Requis dans `.env.local` :
+```
+{{ENV_VARIABLES}}
+```
+
+Voir `.env.example` pour le template.
+
+## Scope
+
+### MVP
+{{MVP_SCOPE}}
+
+### V2+
+{{FUTURE_SCOPE}}
+
+## Contraintes
+{{CONSTRAINTS}}
+
+---
+
+## Guidelines Héritées
+
+Ce projet hérite des guidelines globales de `~/.claude/CLAUDE.md` :
+- Conventions de code
+- Règles de sécurité
+- Workflow git
+
+Et a accès aux commands/skills globaux :
+- `/refactor`, `/debug`, `/test`, `/review`, `/security-check`
+- Skills : aws-expert, code-reviewer

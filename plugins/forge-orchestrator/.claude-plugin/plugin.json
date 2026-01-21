@@ -1,0 +1,9 @@
+{
+  "name": "forge-orchestrator",
+  "description": "Project creation, requirements refinement, and orchestration tools for La Forge",
+  "version": "1.0.0",
+  "author": {
+    "name": "Thomas"
+  },
+  "keywords": ["orchestration", "project-creation", "requirements", "templates"]
+}

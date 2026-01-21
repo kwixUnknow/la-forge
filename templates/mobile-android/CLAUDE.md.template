@@ -1,0 +1,93 @@
+# {{PROJECT_NAME}} - Android App
+
+## Contexte Métier
+{{BUSINESS_CONTEXT}}
+
+## Utilisateurs
+{{USERS_DESCRIPTION}}
+
+## Problème Résolu
+{{PROBLEM_STATEMENT}}
+
+## Critères de Succès
+{{SUCCESS_CRITERIA}}
+
+---
+
+## Quick Start
+
+```bash
+# Build
+./gradlew build
+
+# Run tests
+./gradlew test
+
+# Install on device
+./gradlew installDebug
+
+# Lint
+./gradlew lint
+```
+
+## Architecture
+
+### Stack Technique
+- **Language** : {{LANGUAGE}} (Kotlin / React Native)
+- **UI** : {{UI_FRAMEWORK}} (Jetpack Compose / XML / React Native)
+- **Architecture** : {{ARCHITECTURE}} (MVVM / Clean / Redux)
+- **Backend** : {{BACKEND}}
+- **Auth** : {{AUTH_PROVIDER}}
+
+### Structure du Projet (Kotlin)
+```
+{{PROJECT_NAME}}/
+├── app/
+│   └── src/
+│       ├── main/
+│       │   ├── java/com/{{package}}/
+│       │   │   ├── MainActivity.kt
+│       │   │   ├── features/
+│       │   │   │   ├── auth/
+│       │   │   │   ├── home/
+│       │   │   │   └── profile/
+│       │   │   ├── core/
+│       │   │   │   ├── network/
+│       │   │   │   └── storage/
+│       │   │   └── ui/
+│       │   │       ├── components/
+│       │   │       └── theme/
+│       │   └── res/
+│       └── test/
+└── gradle/
+```
+
+## Conventions
+
+### Kotlin
+- Jetpack Compose pour UI (sauf contrainte)
+- Coroutines pour async
+- Hilt pour DI
+- Kotlin Flow pour reactive
+
+### React Native
+- Functional components + hooks
+- TypeScript obligatoire
+- Redux Toolkit ou Zustand pour state
+
+## Scope
+
+### MVP
+{{MVP_SCOPE}}
+
+### V2+
+{{FUTURE_SCOPE}}
+
+## Contraintes
+{{CONSTRAINTS}}
+
+---
+
+## Guidelines Héritées
+
+Accès aux commands/skills globaux via `~/.claude/`

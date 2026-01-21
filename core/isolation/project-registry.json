@@ -1,0 +1,20 @@
+{
+  "$schema": "./registry-schema.json",
+  "version": "1.0.0",
+  "description": "Registre des projets créés par La Forge avec leurs identifiants uniques",
+  "nextId": 2,
+  "projects": {
+    "resources-identification": {
+      "id": "01",
+      "type": "cli-python",
+      "client": "thomas-internal",
+      "createdAt": "2026-01-20T15:39:14Z",
+      "ports": {
+        "web": 3001,
+        "api": 5001,
+        "postgres": 5401,
+        "redis": 6301
+      }
+    }
+  }
+}

@@ -1,0 +1,92 @@
+# {{PROJECT_NAME}} - iOS App
+
+## Contexte Métier
+{{BUSINESS_CONTEXT}}
+
+## Utilisateurs
+{{USERS_DESCRIPTION}}
+
+## Problème Résolu
+{{PROBLEM_STATEMENT}}
+
+## Critères de Succès
+{{SUCCESS_CRITERIA}}
+
+---
+
+## Quick Start
+
+```bash
+# Ouvrir dans Xcode
+open {{PROJECT_NAME}}.xcodeproj
+# ou si CocoaPods
+pod install && open {{PROJECT_NAME}}.xcworkspace
+
+# Build
+xcodebuild -scheme {{PROJECT_NAME}} -configuration Debug build
+
+# Tests
+xcodebuild test -scheme {{PROJECT_NAME}} -destination 'platform=iOS Simulator,name=iPhone 15'
+```
+
+## Architecture
+
+### Stack Technique
+- **Language** : {{LANGUAGE}} (Swift / React Native)
+- **UI** : {{UI_FRAMEWORK}} (SwiftUI / UIKit / React Native)
+- **Architecture** : {{ARCHITECTURE}} (MVVM / Clean / Redux)
+- **Backend** : {{BACKEND}}
+- **Auth** : {{AUTH_PROVIDER}}
+
+### Structure du Projet
+```
+{{PROJECT_NAME}}/
+├── App/
+│   ├── {{PROJECT_NAME}}App.swift
+│   └── ContentView.swift
+├── Features/
+│   ├── Auth/
+│   ├── Home/
+│   └── Profile/
+├── Core/
+│   ├── Network/
+│   ├── Storage/
+│   └── Utils/
+├── UI/
+│   ├── Components/
+│   └── Styles/
+├── Resources/
+│   ├── Assets.xcassets
+│   └── Localizable.strings
+└── Tests/
+```
+
+## Conventions
+
+### Swift
+- SwiftUI par défaut (sauf contrainte iOS < 14)
+- MVVM avec Observable
+- Async/await pour l'async
+- Pas de force unwrap (`!`) sauf assets
+
+### React Native
+- Functional components + hooks
+- TypeScript obligatoire
+- Redux Toolkit ou Zustand pour state
+
+## Scope
+
+### MVP
+{{MVP_SCOPE}}
+
+### V2+
+{{FUTURE_SCOPE}}
+
+## Contraintes
+{{CONSTRAINTS}}
+
+---
+
+## Guidelines Héritées
+
+Accès aux commands/skills globaux via `~/.claude/`

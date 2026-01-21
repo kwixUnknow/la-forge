@@ -1,0 +1,21 @@
+{
+  "name": "la-forge",
+  "owner": {
+    "name": "Thomas",
+    "email": "thomas@example.com"
+  },
+  "metadata": {
+    "description": "La Forge - Project orchestration and shared tooling for Thomas Dev Agency",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "forge-orchestrator",
+      "source": "./plugins/forge-orchestrator",
+      "description": "Project creation, requirements refinement, and orchestration tools",
+      "version": "1.0.0",
+      "keywords": ["orchestration", "project-creation", "requirements"],
+      "strict": false
+    }
+  ]
+}

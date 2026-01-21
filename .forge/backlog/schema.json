@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Forge Backlog",
+  "description": "Schema for La Forge ticket management system",
+  "type": "object",
+  "required": ["next_id", "tickets"],
+  "properties": {
+    "next_id": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Next ticket ID to assign"
+    },
+    "tickets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ticket" }
+    }
+  },
+  "$defs": {
+    "ticket": {
+      "type": "object",
+      "required": ["id", "type", "title", "status", "created_at"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(TICKET|BUG|SPIKE)-[0-9]+$",
+          "description": "Unique ticket identifier"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["feature", "task", "bug", "spike", "chore", "docs"],
+          "description": "Type of work"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 100,
+          "description": "Short descriptive title"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the work"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["backlog", "todo", "in_progress", "review", "testing", "done", "rejected", "blocked"],
+          "description": "Current status in workflow"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low"],
+          "default": "medium"
+        },
+        "assignee": {
+          "type": ["string", "null"],
+          "enum": ["supervisor", "planner", "developer", "code-reviewer", "qa-tester", "devops", "documenter", null],
+          "description": "Agent currently assigned"
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of criteria to consider ticket done"
+        },
+        "parent": {
+          "type": ["string", "null"],
+          "description": "Parent ticket ID for sub-tasks"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ticket IDs that must be done first"
+        },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags for filtering"
+        },
+        "estimated_complexity": {
+          "type": "string",
+          "enum": ["XS", "S", "M", "L", "XL"],
+          "description": "T-shirt size estimate"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "started_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "completed_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": { "type": "string", "format": "date-time" },
+              "from_status": { "type": ["string", "null"] },
+              "to_status": { "type": "string" },
+              "agent": { "type": "string" },
+              "comment": { "type": "string" }
+            }
+          },
+          "description": "Status change history"
+        }
+      }
+    }
+  }
+}
