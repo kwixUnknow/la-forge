@@ -88,7 +88,7 @@ function createTicketElement(ticket) {
 
     const assigneeHtml = ticket.assignee
         ? `<div class="ticket-assignee">
-             <div class="agent-avatar">${ticket.assignee[0].toUpperCase()}</div>
+             <div class="agent-avatar">${ticket.assignee.charAt(0).toUpperCase()}</div>
              <span>${ticket.assignee}</span>
            </div>`
         : '<span>Unassigned</span>';

@@ -2,10 +2,65 @@
   "$schema": "./schema.json",
   "next_id": 6,
   "tickets": [
-    {"id": "TICKET-001", "type": "feature", "title": "Create local Kanban UI", "status": "done", "labels": ["ui"]},
-    {"id": "TICKET-002", "type": "feature", "title": "Add dark mode toggle", "status": "done", "labels": ["ui"]},
-    {"id": "BUG-001", "type": "bug", "title": "Kanban UI does not display tickets", "description": "Fix the UI to properly load and display tickets from the API", "status": "todo", "priority": "high", "labels": ["bug", "ui"]},
-    {"id": "TICKET-003", "type": "feature", "title": "Add Product Owner agent", "status": "backlog", "labels": ["workflow"]},
-    {"id": "BUG-002", "type": "bug", "title": "API POST crashes server", "description": "Fix POST endpoint to create tickets", "status": "todo", "priority": "high", "labels": ["bug", "api"]}
+    {
+      "id": "TICKET-001",
+      "type": "feature",
+      "title": "Create local Kanban UI",
+      "status": "done",
+      "labels": [
+        "ui"
+      ]
+    },
+    {
+      "id": "TICKET-002",
+      "type": "feature",
+      "title": "Add dark mode toggle",
+      "status": "done",
+      "labels": [
+        "ui"
+      ]
+    },
+    {
+      "id": "BUG-001",
+      "type": "bug",
+      "title": "Kanban UI does not display tickets",
+      "description": "Fix the UI to properly load and display tickets from the API",
+      "status": "done",
+      "priority": "high",
+      "labels": [
+        "bug",
+        "ui"
+      ],
+      "history": [
+        {
+          "timestamp": "2026-01-21T16:27:29.241081",
+          "field": "status",
+          "old_value": "in_progress",
+          "new_value": "done"
+        }
+      ],
+      "updated_at": "2026-01-21T16:27:29.241089"
+    },
+    {
+      "id": "TICKET-003",
+      "type": "feature",
+      "title": "Add Product Owner agent",
+      "status": "backlog",
+      "labels": [
+        "workflow"
+      ]
+    },
+    {
+      "id": "BUG-002",
+      "type": "bug",
+      "title": "API POST crashes server",
+      "description": "Fix POST endpoint to create tickets",
+      "status": "in_progress",
+      "priority": "high",
+      "labels": [
+        "bug",
+        "api"
+      ]
+    }
   ]
 }
