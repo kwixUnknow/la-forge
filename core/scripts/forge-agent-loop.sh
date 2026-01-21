@@ -86,12 +86,8 @@ while true; do
                     TITLE=$(jq -r --arg id "$TICKET_ID" '.tickets[] | select(.id == $id) | .title' "$TICKETS" 2>/dev/null)
                     DESC=$(jq -r --arg id "$TICKET_ID" '.tickets[] | select(.id == $id) | .description' "$TICKETS" 2>/dev/null)
 
-                    # 1. Create branch (direct git)
-                    log "${CYAN}Creating branch: $BRANCH${NC}"
-                    cd "$PROJECT_DIR" && git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
-
-                    # 2. Implement feature (Claude does the actual work)
-                    log "${CYAN}Implementing ticket...${NC}"
+                    # 1. Implement feature (Claude does the actual work on main branch)
+                    log "${CYAN}Implementing ticket on main...${NC}"
                     run_claude "You are the developer. Implement this ticket:
 Ticket: $TICKET_ID
 Title: $TITLE
@@ -99,39 +95,30 @@ Description: $DESC
 
 Create the necessary files and code. Be concise."
 
-                    # 3. Commit changes (direct git)
+                    # 2. Commit changes (direct git)
                     log "${CYAN}Committing changes...${NC}"
                     COMMIT_MSG="feat($TICKET_ID): $TITLE"
                     cd "$PROJECT_DIR" && git add -A && git commit -m "$COMMIT_MSG" --no-verify 2>/dev/null || echo "Nothing to commit"
 
-                    # 4. Push branch (direct git)
-                    log "${CYAN}Pushing branch...${NC}"
-                    cd "$PROJECT_DIR" && git push -u origin "$BRANCH" 2>/dev/null || echo "Push failed"
+                    # 3. Push to main (direct git)
+                    log "${CYAN}Pushing to main...${NC}"
+                    cd "$PROJECT_DIR" && git push origin main 2>/dev/null || echo "Push failed"
 
-                    # 5. Create PR (direct gh)
-                    log "${CYAN}Creating PR...${NC}"
-                    PR_URL=$(cd "$PROJECT_DIR" && gh pr create --title "$COMMIT_MSG" --body "## $TICKET_ID: $TITLE" --head "$BRANCH" 2>/dev/null || echo "")
-                    PR_NUM=$(echo "$PR_URL" | grep -o '[0-9]*$')
-                    log "PR created: $PR_URL"
-
-                    # 6. Update ticket to review (direct jq)
+                    # 4. Update ticket to review (direct jq)
                     log "${CYAN}Updating ticket to review...${NC}"
                     jq --arg id "$TICKET_ID" '(.tickets[] | select(.id == $id)).status = "review"' "$TICKETS" > /tmp/t.json && mv /tmp/t.json "$TICKETS"
 
-                    # 7. Clear inbox (direct jq)
+                    # 5. Clear inbox (direct jq)
                     log "${CYAN}Clearing inbox...${NC}"
                     jq '.pending_tasks = []' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
 
-                    # 8. Add to reviewer inbox (direct jq)
+                    # 6. Add to reviewer inbox (direct jq)
                     log "${CYAN}Adding to reviewer inbox...${NC}"
-                    jq --arg tid "$TICKET_ID" --arg br "$BRANCH" --arg url "$PR_URL" --arg num "$PR_NUM" \
-                      '.pending_tasks += [{"ticket_id": $tid, "action": "review", "branch": $br, "pr_url": $url, "pr_number": $num}]' \
+                    jq --arg tid "$TICKET_ID" --arg cm "$COMMIT_MSG" \
+                      '.pending_tasks += [{"ticket_id": $tid, "action": "review", "commit_msg": $cm}]' \
                       "$FORGE_DIR/agent-state/code-reviewer/inbox.json" > /tmp/r.json && mv /tmp/r.json "$FORGE_DIR/agent-state/code-reviewer/inbox.json"
 
-                    # 9. Checkout main (direct git)
-                    cd "$PROJECT_DIR" && git checkout main 2>/dev/null || git checkout master
-
-                    log "Ticket $TICKET_ID sent to code-reviewer (PR: $PR_NUM)"
+                    log "Ticket $TICKET_ID sent to code-reviewer"
                     IDLE_COUNT=0
                 else
                     sleep 10
@@ -154,33 +141,24 @@ Create the necessary files and code. Be concise."
                 BRANCH=$(echo "$TASK" | jq -r '.branch // empty')
 
                 if [ -n "$TICKET_ID" ] && [ "$TICKET_ID" != "null" ]; then
-                    log "Found review task: $TICKET_ID (PR #$PR_NUM)"
+                    log "Found review task: $TICKET_ID"
 
-                    # 1. Review the PR (Claude reviews, then direct approve)
-                    log "${CYAN}Reviewing PR #$PR_NUM...${NC}"
-                    if [ -n "$PR_NUM" ] && [ "$PR_NUM" != "null" ]; then
-                        run_claude "You are the code reviewer. Review PR #$PR_NUM for ticket $TICKET_ID. Use gh pr view $PR_NUM to see changes. Be concise."
+                    # 1. Review the latest commit (Claude reviews)
+                    log "${CYAN}Reviewing code for $TICKET_ID...${NC}"
+                    run_claude "You are the code reviewer. Review the latest commit for ticket $TICKET_ID. Use 'git log -1 --stat' and 'git show' to see changes. Be concise."
 
-                        # 2. Approve the PR (direct gh)
-                        log "${CYAN}Approving PR...${NC}"
-                        cd "$PROJECT_DIR" && gh pr review "$PR_NUM" --approve --body "LGTM! Approved by Code Review Agent." 2>/dev/null || echo "Approval failed"
-                    else
-                        log "No PR number, skipping gh review"
-                        run_claude "You are the code reviewer. Briefly review the code changes for ticket $TICKET_ID on branch $BRANCH. Be concise."
-                    fi
-
-                    # 3. Update ticket to testing (direct jq)
+                    # 2. Update ticket to testing (direct jq)
                     log "${CYAN}Updating to testing...${NC}"
                     jq --arg id "$TICKET_ID" '(.tickets[] | select(.id == $id)).status = "testing"' "$TICKETS" > /tmp/t.json && mv /tmp/t.json "$TICKETS"
 
-                    # 4. Clear inbox (direct jq)
+                    # 3. Clear inbox (direct jq)
                     log "${CYAN}Clearing inbox...${NC}"
                     jq '.pending_tasks = []' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
 
-                    # 5. Add to QA inbox (direct jq)
+                    # 4. Add to QA inbox (direct jq)
                     log "${CYAN}Adding to QA inbox...${NC}"
-                    jq --arg tid "$TICKET_ID" --arg br "$BRANCH" --arg url "$PR_URL" --arg num "$PR_NUM" \
-                      '.pending_tasks += [{"ticket_id": $tid, "action": "test", "branch": $br, "pr_url": $url, "pr_number": $num}]' \
+                    jq --arg tid "$TICKET_ID" \
+                      '.pending_tasks += [{"ticket_id": $tid, "action": "test"}]' \
                       "$FORGE_DIR/agent-state/qa-tester/inbox.json" > /tmp/q.json && mv /tmp/q.json "$FORGE_DIR/agent-state/qa-tester/inbox.json"
 
                     log "Ticket $TICKET_ID sent to qa-tester"
@@ -205,27 +183,21 @@ Create the necessary files and code. Be concise."
                 BRANCH=$(echo "$TASK" | jq -r '.branch // empty')
 
                 if [ -n "$TICKET_ID" ] && [ "$TICKET_ID" != "null" ]; then
-                    log "Found test task: $TICKET_ID (PR #$PR_NUM)"
+                    log "Found test task: $TICKET_ID"
 
                     # 1. Test the implementation (Claude verifies)
                     log "${CYAN}Testing implementation...${NC}"
                     run_claude "You are the QA tester. Verify ticket $TICKET_ID is implemented correctly. Check if files exist and code looks functional. Be concise."
 
-                    # 2. Merge the PR (direct gh)
-                    if [ -n "$PR_NUM" ] && [ "$PR_NUM" != "null" ]; then
-                        log "${CYAN}Merging PR #$PR_NUM...${NC}"
-                        cd "$PROJECT_DIR" && gh pr merge "$PR_NUM" --squash --delete-branch 2>/dev/null || echo "Merge failed or already merged"
-                    fi
-
-                    # 3. Mark ticket as done (direct jq)
+                    # 2. Mark ticket as done (direct jq)
                     log "${CYAN}Marking as done...${NC}"
                     jq --arg id "$TICKET_ID" '(.tickets[] | select(.id == $id)).status = "done"' "$TICKETS" > /tmp/t.json && mv /tmp/t.json "$TICKETS"
 
-                    # 4. Clear inbox (direct jq)
+                    # 3. Clear inbox (direct jq)
                     log "${CYAN}Clearing inbox...${NC}"
                     jq '.pending_tasks = []' "$INBOX" > /tmp/i.json && mv /tmp/i.json "$INBOX"
 
-                    log "Ticket $TICKET_ID DONE! (PR merged)"
+                    log "Ticket $TICKET_ID DONE!"
                     IDLE_COUNT=0
                 else
                     sleep 10
