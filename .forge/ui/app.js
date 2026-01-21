@@ -45,7 +45,12 @@ async function loadTickets() {
         const response = await fetch('/api/tickets');
         if (response.ok) {
             tickets = await response.json();
+            console.log('Loaded tickets:', tickets);
             renderBoard();
+            updateSystemStatus('active');
+        } else {
+            console.error('Failed to load tickets:', response.status);
+            updateSystemStatus('error');
         }
     } catch (error) {
         console.error('Failed to load tickets:', error);
@@ -57,11 +62,14 @@ async function loadTickets() {
 function renderBoard() {
     const statuses = ['backlog', 'todo', 'in_progress', 'review', 'testing', 'done'];
 
+    console.log('Rendering board with', tickets.length, 'tickets');
+
     statuses.forEach(status => {
         const zone = document.getElementById(`zone-${status}`);
         const count = document.getElementById(`count-${status}`);
 
         const statusTickets = tickets.filter(t => t.status === status);
+        console.log(`Status ${status}:`, statusTickets.length, 'tickets');
         count.textContent = statusTickets.length;
 
         zone.innerHTML = '';
@@ -88,10 +96,10 @@ function createTicketElement(ticket) {
     div.innerHTML = `
         <div class="ticket-id">${ticket.id}</div>
         <div class="ticket-title">${escapeHtml(ticket.title)}</div>
-        <div class="ticket-description">${escapeHtml(ticket.description)}</div>
+        <div class="ticket-description">${escapeHtml(ticket.description || '')}</div>
         <div class="ticket-meta">
             ${assigneeHtml}
-            <span>${formatDate(ticket.updated_at)}</span>
+            <span>${formatDate(ticket.updated_at || ticket.created_at)}</span>
         </div>
     `;
 
@@ -274,7 +282,10 @@ function escapeHtml(text) {
 }
 
 function formatDate(isoString) {
+    if (!isoString) return 'N/A';
     const date = new Date(isoString);
+    if (isNaN(date.getTime())) return 'N/A';
+
     const now = new Date();
     const diff = now - date;
 
