@@ -1,6 +1,6 @@
 {
   "$schema": "./schema.json",
-  "next_id": 4,
+  "next_id": 6,
   "tickets": [
     {
       "id": "TICKET-001",
@@ -62,7 +62,7 @@
       "type": "feature",
       "title": "Add dark mode toggle",
       "description": "Add a dark mode toggle button to the Kanban UI that saves preference to localStorage.",
-      "status": "todo",
+      "status": "done",
       "priority": "medium",
       "assignee": "developer",
       "acceptance_criteria": [
@@ -108,6 +108,47 @@
         "ui"
       ],
       "created_at": "2026-01-21T12:00:00Z",
+      "history": []
+    },
+    {
+      "id": "TICKET-003",
+      "type": "feature",
+      "title": "Add Product Owner agent to workflow",
+      "description": "## Context\nLe workflow actuel manque de validation. Les tickets sont implémentés sans vérifier que le besoin est clair, et sans valider que l implementation fonctionne réellement.\n\n## Solution\nAjouter un agent Product Owner qui:\n1. Raffine les tickets avant développement (backlog → todo)\n2. Valide les implémentations après done\n3. Crée des bug tickets si la validation échoue\n\n## Acceptance Criteria\n- Agent PO défini dans core/agents/product-owner.md ✓ (déjà fait)\n- PO intégré dans forge-agent-loop.sh\n- PO valide les tickets done et crée bugs si nécessaire\n- Workflow mis à jour: backlog → [PO] → todo → ... → done → [PO validate]",
+      "status": "backlog",
+      "priority": "high",
+      "assignee": null,
+      "acceptance_criteria": [
+        "Agent PO défini dans core/agents/",
+        "PO intégré dans forge-agent-loop.sh",
+        "PO valide les tickets done",
+        "PO peut créer des bug tickets automatiquement"
+      ],
+      "labels": [
+        "workflow",
+        "agent"
+      ],
+      "created_at": "2026-01-21T14:49:03Z",
+      "history": []
+    },
+    {
+      "id": "BUG-002",
+      "type": "bug",
+      "title": "API POST /api/tickets crashes server",
+      "description": "POST requests to create tickets cause the server to crash with empty reply.\n\n## Steps to reproduce\n1. curl -X POST http://localhost:8765/api/tickets -d {\"title\":\"test\"}\n2. Server returns empty reply (error 52)\n\n## Expected\nTicket should be created and returned as JSON.",
+      "status": "todo",
+      "priority": "high",
+      "assignee": null,
+      "acceptance_criteria": [
+        "POST creates ticket",
+        "Returns created ticket as JSON",
+        "No server crash"
+      ],
+      "labels": [
+        "bug",
+        "api"
+      ],
+      "created_at": "2026-01-21T14:49:03Z",
       "history": []
     }
   ]

@@ -39,14 +39,33 @@ class TicketManager:
         """Read tickets from file"""
         try:
             with open(self.tickets_file, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                # Handle both formats: {"tickets": [...]} and [...]
+                if isinstance(data, dict) and 'tickets' in data:
+                    return data['tickets']
+                return data if isinstance(data, list) else []
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
     def _write_tickets(self, tickets: list):
         """Write tickets to file"""
+        # Read the existing structure to preserve other fields
+        existing_data = {}
+        try:
+            with open(self.tickets_file, 'r') as f:
+                existing_data = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+
+        # Preserve the structure if it exists
+        if isinstance(existing_data, dict):
+            existing_data['tickets'] = tickets
+            data = existing_data
+        else:
+            data = tickets
+
         with open(self.tickets_file, 'w') as f:
-            json.dump(tickets, f, indent=2)
+            json.dump(data, f, indent=2)
 
     def get_all(self) -> list:
         """Get all tickets"""
