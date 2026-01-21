@@ -12,6 +12,5 @@ CLAUDE.local.md
 
 # Forge agent state (transient - modified by agents)
 .forge/agent-state/
-.forge/backlog/tickets.json
 .forge/kanban-db/
 .forge/metrics.json
