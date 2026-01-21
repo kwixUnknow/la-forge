@@ -1,0 +1,63 @@
+name: PR Review Agent
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          echo "## PR #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Files Changed:" >> $GITHUB_STEP_SUMMARY
+          gh pr diff ${{ github.event.pull_request.number }} --name-only >> $GITHUB_STEP_SUMMARY
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Claude Code Review
+        id: review
+        run: |
+          # Get the diff
+          DIFF=$(gh pr diff ${{ github.event.pull_request.number }})
+
+          # Call Claude API for review
+          REVIEW=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "x-api-key: ${{ secrets.ANTHROPIC_API_KEY }}" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d "{
+              \"model\": \"claude-sonnet-4-20250514\",
+              \"max_tokens\": 1024,
+              \"messages\": [{
+                \"role\": \"user\",
+                \"content\": \"Review this code diff and provide concise feedback on bugs, security issues, and improvements:\n\n$DIFF\"
+              }]
+            }" | jq -r '.content[0].text // "Review failed"')
+
+          echo "REVIEW<<EOF" >> $GITHUB_OUTPUT
+          echo "$REVIEW" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post Review Comment
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} --body "## 🤖 AI Code Review
+
+          ${{ steps.review.outputs.REVIEW }}
+
+          ---
+          *Automated review by La Forge*"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
