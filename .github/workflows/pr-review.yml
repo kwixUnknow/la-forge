@@ -1,11 +1,11 @@
-name: PR Review Agent
+name: PR Check
 
 on:
   pull_request:
     types: [opened, synchronize]
 
 jobs:
-  review:
+  check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -13,51 +13,35 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Get changed files
-        id: changed
+      - name: List changed files
         run: |
-          echo "## PR #${{ github.event.pull_request.number }}" >> $GITHUB_STEP_SUMMARY
-          echo "### Files Changed:" >> $GITHUB_STEP_SUMMARY
-          gh pr diff ${{ github.event.pull_request.number }} --name-only >> $GITHUB_STEP_SUMMARY
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "## Changed Files" >> $GITHUB_STEP_SUMMARY
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} >> $GITHUB_STEP_SUMMARY
 
-      - name: Run Claude Code Review
-        id: review
+      - name: Check JSON syntax
         run: |
-          # Get the diff
-          DIFF=$(gh pr diff ${{ github.event.pull_request.number }})
+          echo "### JSON Validation" >> $GITHUB_STEP_SUMMARY
+          find . -name "*.json" -type f | while read f; do
+            if jq empty "$f" 2>/dev/null; then
+              echo "✅ $f" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ $f - Invalid JSON" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          done
 
-          # Call Claude API for review
-          REVIEW=$(curl -s https://api.anthropic.com/v1/messages \
-            -H "x-api-key: ${{ secrets.ANTHROPIC_API_KEY }}" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
-            -d "{
-              \"model\": \"claude-sonnet-4-20250514\",
-              \"max_tokens\": 1024,
-              \"messages\": [{
-                \"role\": \"user\",
-                \"content\": \"Review this code diff and provide concise feedback on bugs, security issues, and improvements:\n\n$DIFF\"
-              }]
-            }" | jq -r '.content[0].text // "Review failed"')
-
-          echo "REVIEW<<EOF" >> $GITHUB_OUTPUT
-          echo "$REVIEW" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Post Review Comment
+      - name: Check shell scripts
         run: |
-          gh pr comment ${{ github.event.pull_request.number }} --body "## 🤖 AI Code Review
+          echo "### Shell Scripts" >> $GITHUB_STEP_SUMMARY
+          find . -name "*.sh" -type f | while read f; do
+            if bash -n "$f" 2>/dev/null; then
+              echo "✅ $f" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ $f - Syntax error" >> $GITHUB_STEP_SUMMARY
+              exit 1
+            fi
+          done
 
-          ${{ steps.review.outputs.REVIEW }}
-
-          ---
-          *Automated review by La Forge*"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Summary
+        run: echo "✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
